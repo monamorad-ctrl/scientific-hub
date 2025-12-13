@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <title>Scientific Hub</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+<div class="app">
+
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <h2>Scientific Hub</h2>
+    <ul>
+      <li onclick="showPage('home')">🏠 الرئيسية</li>
+      <li onclick="showPage('security')">🔐 الأمن السيبراني</li>
+      <li onclick="showPage('ai')">🤖 الذكاء الاصطناعي</li>
+      <li onclick="showPage('linux')">💻 أوامر لينكس</li>
+      <li onclick="showPage('contact')">✉️ تواصل</li>
+    </ul>
+  </aside>
+
+  <!-- Content -->
+  <main class="content">
+
+    <section id="home" class="page active">
+      <h1>لوحة التحكم</h1>
+      <p>اختر أداة للبدء</p>
+    </section>
+
+    <section id="security" class="page">
+      <h1>الأمن السيبراني</h1>
+      <input type="file" />
+      <textarea placeholder="كود أو ملف للفحص"></textarea>
+      <button>تحليل</button>
+    </section>
+
+    <section id="ai" class="page">
+      <h1>الذكاء الاصطناعي</h1>
+      <textarea placeholder="الصقي الكود هنا"></textarea>
+      <button>اشرح / صحح</button>
+    </section>
+
+    <section id="linux" class="page">
+      <h1>محاكي أوامر لينكس</h1>
+      <input placeholder="مثال: ls / nmap" />
+      <div class="terminal">output...</div>
+    </section>
+
+    <section id="contact" class="page">
+      <h1>تواصل معنا</h1>
+      <input placeholder="اسمك" />
+      <input placeholder="البريد الإلكتروني" />
+      <textarea placeholder="رسالتك"></textarea>
+      <button>إرسال</button>
+    </section>
+
+  </main>
+</div>
+
+<script src="app.js"></script>
+</body>
+</html>
