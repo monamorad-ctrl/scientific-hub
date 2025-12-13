@@ -1,0 +1,640 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Scientific Hub — SPA (Cyber / AI / Linux)</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600&family=Poppins:wght@300;400;600&family=Nunito:wght@300;400;600&display=swap" rel="stylesheet">
+  <style>
+  :root{
+    --purple:#7b1fa2; --purple-dark:#4a148c; --white:#fff; --muted:#f6f3fb; --text:#1f1f1f;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%}
+  body{
+    font-family:"Cairo","Poppins","Nunito",sans-serif;
+    background: linear-gradient(180deg,var(--purple) 0%, #8e24aa 100%);
+    color:var(--text); padding:18px;
+  }
+  .app{max-width:1100px;margin:18px auto;background:#fff;border-radius:14px;overflow:hidden;display:flex;min-height:72vh;box-shadow:0 12px 40px rgba(0,0,0,0.18)}
+  .sidebar{width:300px;background:linear-gradient(180deg,var(--purple),#9c27b0);color:#fff;padding:20px;display:flex;flex-direction:column;gap:12px}
+  .main{flex:1;padding:22px;overflow:auto}
+  .logo{width:52px;height:52px;border-radius:10px;background:rgba(255,255,255,0.12);display:flex;align-items:center;justify-content:center;font-weight:700}
+  .user-box{display:flex;gap:10px;align-items:center;background:rgba(255,255,255,0.05);padding:10px;border-radius:8px}
+  .nav{display:flex;flex-direction:column;gap:8px;margin-top:6px}
+  .nav button{background:transparent;border:none;color:#fff;padding:10px;border-radius:8px;text-align:right;cursor:pointer;display:flex;justify-content:space-between;align-items:center}
+  .nav button.active{background:rgba(0,0,0,0.12);font-weight:700}
+  select{padding:8px;border-radius:8px;border:none;background:rgba(255,255,255,0.12);color:#fff}
+  .topbar{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:14px}
+  input,textarea,select.form{width:100%;padding:10px;border-radius:8px;border:1px solid #eee;background:var(--muted)}
+  label{display:block;margin:8px 0 6px;color:#333;font-size:14px}
+  .btn{padding:8px 14px;border-radius:8px;border:none;cursor:pointer;background:#eee}
+  .btn.primary{background:var(--purple);color:#fff;font-weight:700}
+  .section{display:none}
+  .section.active{display:block}
+  .card{background:#fff;padding:12px;border-radius:10px;box-shadow:0 6px 18px rgba(0,0,0,0.06);margin-bottom:12px}
+  .updates-grid{display:grid;gap:10px}
+  .update{background:#faf8ff;padding:10px;border-radius:8px;border:1px solid #efe7fb}
+  .terminal{background:#0b0f17;color:#e6e6f2;padding:12px;border-radius:8px;min-height:160px;font-family:monospace;overflow:auto}
+  .cmd-input{width:100%;padding:10px;border-radius:8px;border:1px solid #222;background:#071021;color:#e6e6f2}
+  .small{font-size:13px;color:#555}
+  .files-list{list-style:none;padding-left:0}
+  .files-list li{padding:8px;border-bottom:1px solid #eee}
+  .hint{font-size:12px;color:#666;margin-top:6px}
+  @media (max-width:900px){
+    .app{flex-direction:column}
+    .sidebar{width:100%;flex-direction:row;align-items:center;gap:12px;padding:12px;overflow:auto}
+    .nav{flex-direction:row;gap:6px}
+  }
+  </style>
+</head>
+<body>
+  <div class="app" role="application" aria-label="Scientific Hub SPA">
+    <aside class="sidebar" aria-hidden="false">
+      <div style="display:flex;align-items:center;gap:12px">
+        <div class="logo">SH</div>
+        <div>
+          <div style="font-weight:700" data-i18n="brand">Scientific Hub</div>
+          <div class="small" data-i18n="tagline">بوابتك للمحتوى العلمي</div>
+        </div>
+      </div>
+
+      <div class="user-box" id="userBox">
+        <div style="width:44px;height:44px;border-radius:8px;background:rgba(255,255,255,0.12);display:flex;align-items:center;justify-content:center;font-weight:700" id="avatar">?</div>
+        <div>
+          <div id="userName">ضيف</div>
+          <div class="small" id="userRole">مستخدم</div>
+        </div>
+      </div>
+
+      <nav class="nav" aria-label="Main navigation">
+        <button data-section="dashboard" class="active" id="navDashboard"><span data-i18n="navDashboard">الرئيسية</span><span>🏠</span></button>
+        <button data-section="cyber" id="navCyber"><span data-i18n="navCyber">الأمن السيبراني</span><span>🔐</span></button>
+        <button data-section="ai" id="navAI"><span data-i18n="navAI">الذكاء الاصطناعي</span><span>🤖</span></button>
+        <button data-section="linux" id="navLinux"><span data-i18n="navLinux">أوامر لينكس</span><span>💻</span></button>
+        <button data-section="contact" id="navContact"><span data-i18n="navContact">تواصل</span><span>✉️</span></button>
+        <button id="logoutBtn"><span data-i18n="logout">تسجيل الخروج</span><span>🔓</span></button>
+      </nav>
+
+      <div style="margin-top:auto;display:flex;flex-direction:column;gap:8px">
+        <div class="small">اللغة</div>
+        <select id="globalLang" aria-label="language select">
+          <option value="ar">العربية</option>
+          <option value="en">English</option>
+          <option value="fr">Français</option>
+        </select>
+        <div class="small" style="margin-top:6px;color:rgba(255,255,255,0.85)">© <span id="yearFooter"></span> Scientific Hub</div>
+      </div>
+    </aside>
+
+    <main class="main" id="main">
+      <div class="topbar">
+        <div style="width:60%"><input id="searchInput" placeholder="ابحث في التحديثات..." /></div>
+        <div style="display:flex;gap:8px;align-items:center">
+          <div id="greeting" class="small"></div>
+          <button class="btn" id="toggleLogin">تغيير المستخدم</button>
+        </div>
+      </div>
+
+      <!-- LOGIN -->
+      <section id="loginSection" class="section active">
+        <div class="card" style="display:flex;gap:12px;align-items:stretch;flex-wrap:wrap">
+          <div style="flex:1;min-width:260px">
+            <h3 data-i18n="loginTitle">تسجيل الدخول</h3>
+            <p class="small" data-i18n="loginHelp">اختاري اللغة ثم سجّلي دخولك باسمك. (محاكاة)</p>
+            <form id="loginForm" onsubmit="return handleLogin(event)">
+              <label data-i18n="usernameLabel">اسم المستخدم</label>
+              <input id="username" required />
+              <label data-i18n="passwordLabel">كلمة المرور</label>
+              <input id="password" type="password" required />
+              <div style="display:flex;gap:8px;margin-top:8px;align-items:center">
+                <label style="display:flex;gap:6px;align-items:center"><input type="checkbox" id="rememberMe" /> <span data-i18n="remember">تذكرني</span></label>
+                <select id="lang" class="form" onchange="setLangFromLogin(this.value)" style="width:160px">
+                  <option value="ar">العربية</option>
+                  <option value="en">English</option>
+                  <option value="fr">Français</option>
+                </select>
+              </div>
+              <div style="margin-top:10px;display:flex;gap:8px">
+                <button class="btn primary" type="submit" data-i18n="loginBtn">دخول</button>
+                <button type="button" class="btn" onclick="fillDemo()">Demo</button>
+              </div>
+            </form>
+          </div>
+          <div style="width:320px;background:linear-gradient(180deg,var(--purple),#9c27b0);color:#fff;padding:12px;border-radius:8px">
+            <h4 data-i18n="welcomeShort">مرحبًا بك!</h4>
+            <p class="small" data-i18n="welcomeDesc">بعد الدخول ستحصلي على لوحة تحكم تجمع كل الأقسام: سيبر، AI، لينكس، تواصل.</p>
+            <p class="small" style="margin-top:8px;color:#ffe">تنبيه: كل الأدوات هنا محاكاة للتعلّم فقط — لا تستخدميها لفحص أنظمة بدون إذن.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- DASHBOARD -->
+      <section id="dashboard" class="section hidden">
+        <h2 data-i18n="dashboardTitle">لوحة التحكم</h2>
+        <div class="card">
+          <div style="display:flex;gap:12px;flex-wrap:wrap">
+            <div style="flex:1;min-width:220px">
+              <h4 data-i18n="cardCyber">الأمن السيبراني</h4>
+              <p class="small" data-i18n="cardCyberDesc">رفع ملفات/كود، وعرض التحديثات.</p>
+              <div style="margin-top:8px"><button class="btn primary" onclick="openSection('cyber')">افتح</button></div>
+            </div>
+            <div style="flex:1;min-width:220px">
+              <h4 data-i18n="cardAI">الذكاء الاصطناعي</h4>
+              <p class="small" data-i18n="cardAIDesc">تصحيح أكواد واستشارات وقاعدة معرفة محليّة.</p>
+              <div style="margin-top:8px"><button class="btn primary" onclick="openSection('ai')">افتح</button></div>
+            </div>
+            <div style="flex:1;min-width:220px">
+              <h4 data-i18n="cardLinux">أوامر لينكس</h4>
+              <p class="small" data-i18n="cardLinuxDesc">محاكي أوامر + محاكاة nmap/wireshark للتعلّم.</p>
+              <div style="margin-top:8px"><button class="btn primary" onclick="openSection('linux')">افتح</button></div>
+            </div>
+            <div style="flex:1;min-width:220px">
+              <h4 data-i18n="cardContact">تواصل</h4>
+              <p class="small" data-i18n="cardContactDesc">أرسلي استفسارك لمشروعات مواقع أو أنظمة حماية للشركة.</p>
+              <div style="margin-top:8px"><button class="btn primary" onclick="openSection('contact')">افتح</button></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- CYBER -->
+      <section id="cyber" class="section hidden">
+        <h2 data-i18n="cyberTitle">الأمن السيبراني</h2>
+        <p class="small" data-i18n="cyberIntro">ارفع الملفات أو الكود هنا (محليًا) لعرضها وتنظيمها.</p>
+
+        <div class="card">
+          <h4>رفع ملف (PDF / TXT)</h4>
+          <input type="file" id="fileUploader" accept=".pdf,.txt" />
+          <div class="hint">الملف يُقرأ ويُخزن مؤقتًا في المتصفح للعرض فقط.</div>
+          <ul id="fileList" class="files-list"></ul>
+        </div>
+
+        <div class="card">
+          <h4>رفع كود (JS / PY / TXT)</h4>
+          <input type="file" id="codeUploader" accept=".js,.py,.txt" />
+          <div class="hint">يمكن رفع ملفات كود لعرضها وتشغيل فحوصات بسيطة (lint / suggestions).</div>
+          <ul id="codeList" class="files-list"></ul>
+        </div>
+
+        <div class="card">
+          <h4>تحديثات السيبر</h4>
+          <div id="cyberList" class="updates-grid"></div>
+          <form onsubmit="return addCyberUpdate(event)" style="margin-top:10px">
+            <input id="cyberTitleInput" placeholder="عنوان التحديث" required />
+            <textarea id="cyberBodyInput" rows="3" placeholder="وصف أو رابط (اختياري)"></textarea>
+            <div style="margin-top:8px"><button class="btn primary" type="submit">إضافة</button></div>
+          </form>
+        </div>
+      </section>
+
+      <!-- AI -->
+      <section id="ai" class="section hidden">
+        <h2 data-i18n="aiTitle">الذكاء الاصطناعي</h2>
+        <p class="small" data-i18n="aiIntro">أدوات: تصحيح الأكواد، استشارات، وقاعدة معرفة محليّة.</p>
+
+        <div class="card">
+          <h4>تصحيح كود سريع (JS / PY)</h4>
+          <label>ألصقي الكود هنا</label>
+          <textarea id="codeToFix" rows="8" placeholder="ضع هنا كود JavaScript أو Python"></textarea>
+          <div style="margin-top:8px;display:flex;gap:8px">
+            <select id="codeLang"><option value="js">JavaScript</option><option value="py">Python</option></select>
+            <button class="btn primary" onclick="quickFix()">اقترح تصحيح</button>
+            <button class="btn" onclick="formatCode()">تنسيق (format)</button>
+          </div>
+          <div id="fixResult" class="hint" style="margin-top:8px"></div>
+        </div>
+
+        <div class="card">
+          <h4>قاعدة معرفة محليّة (اضافة / سؤال)</h4>
+          <form onsubmit="return addKBEntry(event)">
+            <input id="kbTitle" placeholder="عنوان المقال / المرجع" required />
+            <textarea id="kbBody" rows="3" placeholder="المحتوى أو الملخص"></textarea>
+            <div style="margin-top:8px"><button class="btn primary" type="submit">أضف إلى القاعدة</button></div>
+          </form>
+
+          <div style="margin-top:12px">
+            <label>اسألي القاعدة</label>
+            <input id="kbQuery" placeholder="اكتب سؤالك هنا..." />
+            <div style="margin-top:8px;display:flex;gap:8px">
+              <button class="btn primary" onclick="kbAsk()">اسأل</button>
+              <button class="btn" onclick="renderKB()">عرض القاعدة</button>
+            </div>
+            <div id="kbResult" class="card" style="margin-top:10px"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- LINUX -->
+      <section id="linux" class="section hidden">
+        <h2 data-i18n="linuxTitle">محاكي أوامر لينكس (تعليمي)</h2>
+        <p class="small" data-i18n="linuxIntro">اكتبي أمراً؛ المحاكي يدعم: ls, pwd, cd, cat, help, clear, nmap, wireshark (محاكاة).</p>
+
+        <div class="card">
+          <div id="terminal" class="terminal" aria-live="polite"></div>
+          <input id="cmdInput" class="cmd-input" placeholder="مثال: ls  أو nmap 192.168.1.1" onkeydown="if(event.key==='Enter'){runCmd();}" />
+          <div class="hint">الأوامر nmap/wireshark هنا تعطي مخرجات تعليمية فقط ولا تقوم بفحص حقيقي.</div>
+        </div>
+      </section>
+
+      <!-- CONTACT -->
+      <section id="contact" class="section hidden">
+        <h2 data-i18n="contactTitle">تواصل معنا</h2>
+        <p class="small" data-i18n="contactIntro">لو عايزة موقع أو نظام حماية للشركة — املأي النموذج.</p>
+
+        <div class="card" style="max-width:760px">
+          <form onsubmit="return submitContact(event)">
+            <label data-i18n="labelName">الاسم</label>
+            <input id="contactName" required />
+            <label data-i18n="labelEmail">البريد الإلكتروني</label>
+            <input id="contactEmail" type="email" required />
+            <label data-i18n="labelMessage">الرسالة</label>
+            <textarea id="contactMessage" rows="5" required></textarea>
+            <div style="margin-top:10px;display:flex;gap:8px">
+              <button class="btn primary" type="submit" id="contactSend">إرسال</button>
+              <button type="button" class="btn" onclick="renderContacts()">عرض الطلبات</button>
+            </div>
+          </form>
+        </div>
+
+        <div id="contactsList" style="margin-top:12px"></div>
+      </section>
+
+    </main>
+  </div>
+
+  <script>
+  // ----------------- ترجمات ونصوص بسيطة -----------------
+  const translations = {
+    ar:{dir:"rtl",font:"Cairo, sans-serif",searchPlaceholder:"ابحث في التحديثات..."},
+    en:{dir:"ltr",font:"Poppins, sans-serif",searchPlaceholder:"Search updates..."},
+    fr:{dir:"ltr",font:"Nunito, sans-serif",searchPlaceholder:"Rechercher..."}
+  };
+
+  // ----------------- بيانات افتراضية -----------------
+  const defaultCyber=[{id:1,title:"CVE-2025-XXXX: ثغرة مثال",body:"شرح للتعامل (محاكاة)"}];
+  const defaultAI=[{id:1,title:"مقدمة في LLMs",body:"ملاحظات سريعة عن النماذج."}];
+
+  // ----------------- init -----------------
+  document.addEventListener('DOMContentLoaded', ()=>{
+    document.getElementById('yearFooter').textContent = new Date().getFullYear();
+    const lang = localStorage.getItem('site_lang') || 'ar';
+    applyLanguage(lang);
+    document.getElementById('globalLang').value = lang;
+    document.getElementById('lang').value = lang;
+
+    if(!localStorage.getItem('cyber_updates')) localStorage.setItem('cyber_updates', JSON.stringify(defaultCyber));
+    if(!localStorage.getItem('ai_updates')) localStorage.setItem('ai_updates', JSON.stringify(defaultAI));
+    if(!localStorage.getItem('kb_entries')) localStorage.setItem('kb_entries', JSON.stringify([]));
+    if(!localStorage.getItem('uploaded_files')) localStorage.setItem('uploaded_files', JSON.stringify([]));
+    if(!localStorage.getItem('uploaded_codes')) localStorage.setItem('uploaded_codes', JSON.stringify([]));
+    if(!localStorage.getItem('contacts')) localStorage.setItem('contacts', JSON.stringify([]));
+
+    renderCyberUpdates(); renderAIUpdates(); renderFiles(); renderCodes(); renderContacts();
+
+    // nav buttons
+    document.querySelectorAll('.nav button').forEach(b=>{
+      b.addEventListener('click', ()=>{
+        const sec = b.getAttribute('data-section');
+        if(sec) openSection(sec);
+        if(b.id === 'logoutBtn') doLogout();
+        document.querySelectorAll('.nav button').forEach(x=>x.classList.remove('active'));
+        if(b.id !== 'logoutBtn') b.classList.add('active');
+      });
+    });
+
+    // login toggle
+    document.getElementById('toggleLogin').addEventListener('click', ()=> {
+      showOnly('loginSection');
+      document.getElementById('username').value=''; document.getElementById('password').value='';
+    });
+
+    // search
+    const s = document.getElementById('searchInput'); s.placeholder = translations[lang].searchPlaceholder || '';
+    s.addEventListener('input', ()=> {
+      const q = s.value.trim().toLowerCase();
+      if(!q){ renderCyberUpdates(); renderAIUpdates(); return; }
+      filterUpdates(q);
+    });
+
+    // file upload events
+    document.getElementById('fileUploader').addEventListener('change', handleFileUpload);
+    document.getElementById('codeUploader').addEventListener('change', handleCodeUpload);
+
+    // resume stored user
+    const storedUser = localStorage.getItem('site_user') || sessionStorage.getItem('site_user');
+    if(storedUser){ setUser(storedUser); showOnly('dashboard'); } else showOnly('loginSection');
+  });
+
+  // ----------------- اللغة -----------------
+  function applyLanguage(lang){
+    localStorage.setItem('site_lang', lang);
+    const tr = translations[lang] || translations.ar;
+    document.documentElement.dir = tr.dir;
+    document.body.style.fontFamily = tr.font;
+    const s = document.getElementById('searchInput'); if(s) s.placeholder = tr.searchPlaceholder || '';
+  }
+  function changeLanguage(l){ applyLanguage(l); document.getElementById('globalLang').value = l; document.getElementById('lang').value = l; }
+  function setLangFromLogin(l){ changeLanguage(l); }
+
+  // ----------------- تسجيل دخول محاكاة -----------------
+  function handleLogin(e){
+    e.preventDefault();
+    const u = document.getElementById('username').value.trim();
+    const p = document.getElementById('password').value.trim();
+    if(!u||!p){ alert('ادخلي اسم وكلمة مرور'); return false; }
+    const remember = document.getElementById('rememberMe').checked;
+    if(remember) localStorage.setItem('site_user', u); else sessionStorage.setItem('site_user', u);
+    setUser(u); showOnly('dashboard'); return false;
+  }
+  function setUser(name){ document.getElementById('avatar').textContent = name.charAt(0).toUpperCase(); document.getElementById('userName').textContent = name; document.getElementById('greeting').textContent = 'مرحباً، '+name; }
+  function doLogout(){ localStorage.removeItem('site_user'); sessionStorage.removeItem('site_user'); setUser('ضيف'); showOnly('loginSection'); document.querySelectorAll('.nav button').forEach(x=>x.classList.remove('active')); document.getElementById('navDashboard').classList.add('active'); }
+
+  // ----------------- تنقّل داخل الصفحة -----------------
+  function showOnly(id){
+    document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+    const el = document.getElementById(id); if(el) el.classList.add('active');
+    document.querySelector('.main').scrollTop = 0;
+  }
+  function openSection(id){
+    const storedUser = localStorage.getItem('site_user') || sessionStorage.getItem('site_user');
+    if(!storedUser){ showOnly('loginSection'); alert('الرجاء تسجيل الدخول أولاً (محاكاة).'); return; }
+    showOnly(id);
+  }
+
+  // ----------------- تحديثات Cyber & AI -----------------
+  function renderCyberUpdates(){
+    const list = document.getElementById('cyberList'); if(!list) return;
+    const arr = JSON.parse(localStorage.getItem('cyber_updates')||'[]'); list.innerHTML=''; arr.slice().reverse().forEach(u=>{ const d=document.createElement('div'); d.className='update'; d.innerHTML=`<h4>${escapeHtml(u.title)}</h4><p class="small">${escapeHtml(u.body)}</p>`; list.appendChild(d); });
+  }
+  function addCyberUpdate(e){
+    e.preventDefault();
+    const t = document.getElementById('cyberTitleInput').value.trim();
+    const b = document.getElementById('cyberBodyInput').value.trim();
+    if(!t) return alert('ادخلي عنوان');
+    const arr = JSON.parse(localStorage.getItem('cyber_updates')||'[]'); arr.push({id:Date.now(),title:t,body:b}); localStorage.setItem('cyber_updates', JSON.stringify(arr));
+    document.getElementById('cyberTitleInput').value=''; document.getElementById('cyberBodyInput').value=''; renderCyberUpdates(); alert('تمت الإضافة (محاكاة).'); return false;
+  }
+  function renderAIUpdates(){
+    const list = document.getElementById('aiList'); if(!list) return;
+    const arr = JSON.parse(localStorage.getItem('ai_updates')||'[]'); list.innerHTML=''; arr.slice().reverse().forEach(u=>{ const d=document.createElement('div'); d.className='update'; d.innerHTML=`<h4>${escapeHtml(u.title)}</h4><p class="small">${escapeHtml(u.body)}</p>`; list.appendChild(d); });
+  }
+  function addAIUpdate(e){
+    e.preventDefault();
+    const t = document.getElementById('aiTitleInput').value.trim();
+    const b = document.getElementById('aiBodyInput').value.trim();
+    if(!t) return alert('ادخلي عنوان');
+    const arr = JSON.parse(localStorage.getItem('ai_updates')||'[]'); arr.push({id:Date.now(),title:t,body:b}); localStorage.setItem('ai_updates', JSON.stringify(arr));
+    document.getElementById('aiTitleInput').value=''; document.getElementById('aiBodyInput').value=''; renderAIUpdates(); alert('تمت الإضافة (محاكاة).'); return false;
+  }
+
+  // ----------------- رفع ملفات وكود -----------------
+  function handleFileUpload(e){
+    const f = e.target.files[0]; if(!f) return;
+    const reader = new FileReader();
+    reader.onload = function(){ const content = reader.result;
+      const arr = JSON.parse(localStorage.getItem('uploaded_files')||'[]');
+      arr.push({id:Date.now(),name:f.name,size:f.size,content:content,type:f.type});
+      localStorage.setItem('uploaded_files', JSON.stringify(arr));
+      renderFiles();
+      alert('تم رفع الملف (محاكاة).');
+    };
+    reader.readAsDataURL(f); // نخزن كـ dataURL (آمن للعرض فقط)
+  }
+  function renderFiles(){
+    const listEl = document.getElementById('fileList'); if(!listEl) return;
+    const arr = JSON.parse(localStorage.getItem('uploaded_files')||'[]'); listEl.innerHTML='';
+    arr.slice().reverse().forEach(it=>{ const li=document.createElement('li'); li.innerHTML = `<strong>${escapeHtml(it.name)}</strong> <span class="small">(${Math.round(it.size/1024)} KB)</span> <button class="btn" onclick='previewFile("${it.id}")'>عرض</button>`; li.querySelector('button').style.marginLeft='8px'; listEl.appendChild(li); });
+  }
+  window.previewFile = function(id){
+    const arr = JSON.parse(localStorage.getItem('uploaded_files')||'[]');
+    const it = arr.find(x=>x.id==id);
+    if(!it) return alert('غير موجود');
+    // فتح في نافذة جديدة (Data URL) أو عرض المحتوى لو txt
+    if(it.type === 'text/plain' || it.name.endsWith('.txt')){
+      // عرض نص
+      const w = window.open('','_blank'); w.document.write(`<pre>${escapeHtml(atob(it.content.split(',')[1]))}</pre>`);
+    } else {
+      // pdf أو غيره
+      const w = window.open(it.content, '_blank');
+    }
+  };
+
+  function handleCodeUpload(e){
+    const f = e.target.files[0]; if(!f) return;
+    const reader = new FileReader();
+    reader.onload = function(){ const content = reader.result;
+      // نقرأ النص (text)
+      const text = content;
+      const arr = JSON.parse(localStorage.getItem('uploaded_codes')||'[]');
+      arr.push({id:Date.now(),name:f.name,size:f.size,content:text});
+      localStorage.setItem('uploaded_codes', JSON.stringify(arr));
+      renderCodes();
+      alert('تم رفع كود (محاكاة).');
+    };
+    reader.readAsText(f);
+  }
+  function renderCodes(){
+    const list = document.getElementById('codeList'); if(!list) return;
+    const arr = JSON.parse(localStorage.getItem('uploaded_codes')||'[]'); list.innerHTML='';
+    arr.slice().reverse().forEach(it=>{ const li=document.createElement('li'); li.innerHTML = `<strong>${escapeHtml(it.name)}</strong> <button class="btn" onclick='viewCode("${it.id}")'>عرض</button> <button class="btn" onclick='quickFixFromFile("${it.id}")'>اقتراح تصحيح</button>`; li.querySelector('button').style.marginLeft='8px'; list.appendChild(li); });
+  }
+  window.viewCode = function(id){
+    const arr = JSON.parse(localStorage.getItem('uploaded_codes')||'[]'); const it = arr.find(x=>x.id==id); if(!it) return alert('غير موجود');
+    const w = window.open('','_blank'); w.document.write(`<pre>${escapeHtml(it.content)}</pre>`);
+  };
+  window.quickFixFromFile = function(id){
+    const arr = JSON.parse(localStorage.getItem('uploaded_codes')||'[]'); const it = arr.find(x=>x.id==id); if(!it) return alert('غير موجود');
+    // نفترض نوع من الاسم
+    const name = it.name.toLowerCase();
+    const lang = name.endsWith('.py') ? 'py' : 'js';
+    document.getElementById('codeToFix').value = it.content;
+    document.getElementById('codeLang').value = lang;
+    openSection('ai');
+    setTimeout(()=> quickFix(), 300);
+  };
+
+  // ----------------- AI: تصحيح كود سريع -----------------
+  function quickFix(){
+    const code = document.getElementById('codeToFix').value || '';
+    const lang = document.getElementById('codeLang').value;
+    if(!code) return alert('ضعي كود أولاً');
+    let res = '';
+    if(lang === 'js'){
+      // اقتراحات بسيطة: تحويل == إلى ===، إضافة ; في نهايات الأسطر التي تبدو JS
+      res += 'اقتراحات لجافاسكربت:\n';
+      if(/==[^=]/.test(code)) res += '- استبدلي "==" بـ "===". (تحسين المطابقة)\n';
+      const missingSemi = code.split('\n').filter(l=> /\w(\)|")?\s*$/.test(l) && !/;$/.test(l) && !/^\s*(if|for|while|function|else|return|const|let|var)/.test(l));
+      if(missingSemi.length) res += `- تحقق من الفواصل المنقوطة في بعض الأسطر (${Math.min(3, missingSemi.length)} أمثلة محتملة)\n`;
+      res += '\nمثال إصلاح (تبديل == إلى ===):\n' + escapeHtml(code.replace(/==/g,'===').slice(0,1000)) + (code.length>1000?'...':'');
+    } else {
+      // Python: تحقق من المسافات (indentation) واستبدال الطباعة print() في بايثون 3
+      res += 'اقتراحات لبايثون:\n';
+      if(/\t/.test(code)) res += '- يفضل استخدام مسافات بدل التابات (PEP8).\n';
+      if(/print\s+["']/.test(code)) res += '- تأكدي من استخدام print() مع أقواس في بايثون 3.\n';
+      res += '\nمثال تنسيق (مقتطف):\n' + escapeHtml(code.slice(0,1000)) + (code.length>1000?'...':'');
+    }
+    document.getElementById('fixResult').textContent = res;
+  }
+
+  function formatCode(){
+    // فقط مسح بادئات ومسافات متعددة — تنسيق بسيط
+    let c = document.getElementById('codeToFix').value || '';
+    c = c.replace(/\t/g,'  ').replace(/\r\n/g,'\n').replace(/[ \t]+$/gm,'');
+    document.getElementById('codeToFix').value = c;
+    alert('تم تطبيق تنسيق بسيط (محاكاة).');
+  }
+
+  // ----------------- KB (قاعدة معرفة) -----------------
+  function addKBEntry(e){
+    e.preventDefault();
+    const t = document.getElementById('kbTitle').value.trim();
+    const b = document.getElementById('kbBody').value.trim();
+    if(!t) return alert('ادخلي عنوان');
+    const arr = JSON.parse(localStorage.getItem('kb_entries')||'[]'); arr.push({id:Date.now(),title:t,body:b}); localStorage.setItem('kb_entries', JSON.stringify(arr));
+    document.getElementById('kbTitle').value=''; document.getElementById('kbBody').value=''; alert('تمت الإضافة إلى القاعدة (محاكاة).'); return false;
+  }
+  function renderKB(){
+    const arr = JSON.parse(localStorage.getItem('kb_entries')||'[]');
+    const out = arr.slice().reverse().map(x=>`<div class="update"><h4>${escapeHtml(x.title)}</h4><p class="small">${escapeHtml(x.body)}</p></div>`).join('');
+    document.getElementById('kbResult').innerHTML = out || '<div class="small">لا توجد مداخل في القاعدة</div>';
+  }
+  function kbAsk(){
+    const q = (document.getElementById('kbQuery').value||'').trim().toLowerCase();
+    if(!q) return alert('اكتبي سؤال');
+    const arr = JSON.parse(localStorage.getItem('kb_entries')||'[]');
+    // بحث بسيط: مطابقة كلمات العنوان أو النص
+    const found = arr.filter(x=> (x.title + ' ' + x.body).toLowerCase().includes(q));
+    if(found.length){
+      const top = found[0];
+      document.getElementById('kbResult').innerHTML = `<h4>النتيجة الأعلى: ${escapeHtml(top.title)}</h4><p class="small">${escapeHtml(top.body)}</p>`;
+    } else {
+      // اقتراحات: البحث في AI updates كذلك
+      const ai = JSON.parse(localStorage.getItem('ai_updates')||'[]');
+      const f2 = ai.filter(x=> (x.title + ' ' + x.body).toLowerCase().includes(q));
+      if(f2.length) document.getElementById('kbResult').innerHTML = `<h4>من تحديثات AI: ${escapeHtml(f2[0].title)}</h4><p class="small">${escapeHtml(f2[0].body)}</p>`;
+      else document.getElementById('kbResult').innerHTML = `<div class="small">لم أجد إجابة محلية. أنصح بالبحث في مصادر خارجية أو إضافة المحتوى إلى القاعدة.</div>`;
+    }
+  }
+
+  // ----------------- Linux emulator (with nmap / wireshark simulation) -----------------
+  function runCmd(){
+    const input = document.getElementById('cmdInput'); const term = document.getElementById('terminal');
+    if(!input||!term) return;
+    const raw = input.value.trim(); if(!raw) return;
+    appendTermLine('$ ' + raw);
+    const parts = raw.split(/\s+/); const cmd = parts[0]; const arg = parts.slice(1).join(' ');
+    const responses = {
+      help: 'Supported: ls, pwd, cd, cat, help, clear, nmap, wireshark\nExample: nmap 192.168.1.1',
+      ls: 'file1.txt  README.md  docs/  scripts/',
+      pwd: '/home/user',
+      cd: (a)=> a? `Switched directory to /home/user/${a}`: `Switched to /home/user`,
+      cat: (a)=> a? `# محتوى ملف ${a}\nThis is simulated file content.`: `Usage: cat filename`,
+      clear: '__CLEAR__'
+    };
+    // محاكاة nmap (تعليمي فقط)
+    if(cmd === 'nmap'){
+      setTimeout(()=> {
+        if(!arg) appendTermLine('Usage: nmap <target>');
+        else {
+          appendTermLine(`Starting Nmap scan on ${arg} (simulated)`);
+          appendTermLine('Host is up (0.023s latency).');
+          appendTermLine('PORT     STATE SERVICE');
+          appendTermLine('22/tcp   open  ssh');
+          appendTermLine('80/tcp   open  http');
+          appendTermLine('443/tcp  open  https');
+          appendTermLine('Nmap done (simulated).');
+        }
+      },300);
+    } else if(cmd === 'wireshark' || cmd === 'tshark'){
+      setTimeout(()=> {
+        appendTermLine('Wireshark capture (simulated):');
+        appendTermLine('1  0.000000 192.168.1.2 → 192.168.1.1  TCP 74  [SYN]');
+        appendTermLine('2  0.000123 192.168.1.1 → 192.168.1.2  TCP 66  [SYN, ACK]');
+        appendTermLine('3  0.000234 192.168.1.2 → 192.168.1.1  TCP 54  [ACK]');
+      },300);
+    } else {
+      setTimeout(()=> {
+        if(responses[cmd]){
+          const r = responses[cmd];
+          if(typeof r === 'function'){ const out = r(arg); if(out === '__CLEAR__') term.innerHTML=''; else appendTermLine(out); }
+          else { if(r === '__CLEAR__') term.innerHTML=''; else appendTermLine(r); }
+        } else {
+          appendTermLine(`${cmd}: command not found (simulated)`);
+        }
+      },250);
+    }
+    input.value=''; term.scrollTop = term.scrollHeight;
+  }
+  function appendTermLine(txt){
+    const term = document.getElementById('terminal'); if(!term) return;
+    const div = document.createElement('div'); div.className='line'; div.innerHTML = escapeHtml(txt).replace(/\n/g,'<br>');
+    term.appendChild(div); term.scrollTop = term.scrollHeight;
+  }
+
+  // ----------------- Contact form (store locally) -----------------
+  function submitContact(e){
+    e.preventDefault();
+    const n = document.getElementById('contactName').value.trim();
+    const em = document.getElementById('contactEmail').value.trim();
+    const m = document.getElementById('contactMessage').value.trim();
+    if(!n||!em||!m) return alert('اكمل الحقول');
+    const arr = JSON.parse(localStorage.getItem('contacts')||'[]');
+    arr.push({id:Date.now(),name:n,email:em,message:m});
+    localStorage.setItem('contacts', JSON.stringify(arr));
+    document.getElementById('contactName').value=''; document.getElementById('contactEmail').value=''; document.getElementById('contactMessage').value='';
+    alert('تم ارسال الطلب (محاكاة).');
+    renderContacts();
+    return false;
+  }
+  function renderContacts(){
+    const arr = JSON.parse(localStorage.getItem('contacts')||'[]');
+    const el = document.getElementById('contactsList'); el.innerHTML = '';
+    if(!arr.length) { el.innerHTML = '<div class="small">لا توجد طلبات</div>'; return; }
+    arr.slice().reverse().forEach(c=> {
+      const d = document.createElement('div'); d.className='card'; d.innerHTML = `<h4>${escapeHtml(c.name)} — ${escapeHtml(c.email)}</h4><p class="small">${escapeHtml(c.message)}</p>`; el.appendChild(d);
+    });
+  }
+
+  // ----------------- Utilities -----------------
+  function escapeHtml(str){ if(!str) return ''; return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+  function filterUpdates(q){
+    q = q.toLowerCase();
+    const cyber = JSON.parse(localStorage.getItem('cyber_updates')||'[]'); const ai = JSON.parse(localStorage.getItem('ai_updates')||'[]');
+    const c = cyber.filter(u=> (u.title+u.body).toLowerCase().includes(q));
+    const a = ai.filter(u=> (u.title+u.body).toLowerCase().includes(q));
+    // رندر
+    const cl = document.getElementById('cyberList'); cl.innerHTML=''; c.slice().reverse().forEach(u=>{ const d=document.createElement('div'); d.className='update'; d.innerHTML=`<h4>${escapeHtml(u.title)}</h4><p class="small">${escapeHtml(u.body)}</p>`; cl.appendChild(d); });
+    const al = document.getElementById('aiList'); al.innerHTML=''; a.slice().reverse().forEach(u=>{ const d=document.createElement('div'); d.className='update'; d.innerHTML=`<h4>${escapeHtml(u.title)}</h4><p class="small">${escapeHtml(u.body)}</p>`; al.appendChild(d); });
+  }
+
+  // ----------------- render files/codes -----------------
+  function renderFiles(){
+    const arr = JSON.parse(localStorage.getItem('uploaded_files')||'[]'); const list = document.getElementById('fileList'); if(!list) return;
+    list.innerHTML=''; arr.slice().reverse().forEach(it=>{ const li=document.createElement('li'); li.innerHTML = `<strong>${escapeHtml(it.name)}</strong> <span class="small">(${Math.round(it.size/1024)} KB)</span> <button class="btn" onclick='previewFile("${it.id}")'>عرض</button>`; list.appendChild(li); });
+  }
+  window.previewFile = function(id){
+    const arr = JSON.parse(localStorage.getItem('uploaded_files')||'[]');
+    const it = arr.find(x=>x.id==id);
+    if(!it) return alert('غير موجود');
+    if(it.type === 'text/plain' || it.name.endsWith('.txt')){
+      const txt = atob(it.content.split(',')[1]);
+      const w = window.open('','_blank'); w.document.write(`<pre>${escapeHtml(txt)}</pre>`);
+    } else {
+      window.open(it.content, '_blank');
+    }
+  };
+
+  function renderCodes(){ const arr = JSON.parse(localStorage.getItem('uploaded_codes')||'[]'); const list = document.getElementById('codeList'); if(!list) return; list.innerHTML=''; arr.slice().reverse().forEach(it=>{ const li=document.createElement('li'); li.innerHTML = `<strong>${escapeHtml(it.name)}</strong> <button class="btn" onclick='viewCode("${it.id}")'>عرض</button> <button class="btn" onclick='quickFixFromFile("${it.id}")'>اقتراح تصحيح</button>`; list.appendChild(li); }); }
+  window.viewCode = function(id){ const arr = JSON.parse(localStorage.getItem('uploaded_codes')||'[]'); const it = arr.find(x=>x.id==id); if(!it) return alert('غير موجود'); const w = window.open('','_blank'); w.document.write(`<pre>${escapeHtml(it.content)}</pre>`); }
+  window.quickFixFromFile = function(id){ const arr = JSON.parse(localStorage.getItem('uploaded_codes')||'[]'); const it = arr.find(x=>x.id==id); if(!it) return alert('غير موجود'); const name = it.name.toLowerCase(); const lang = name.endsWith('.py') ? 'py' : 'js'; document.getElementById('codeToFix').value = it.content; document.getElementById('codeLang').value = lang; openSection('ai'); setTimeout(()=> quickFix(), 350); }
+
+  // demo fill
+  function fillDemo(){ document.getElementById('username').value='Taqa'; document.getElementById('password').value='1234'; document.getElementById('lang').value = localStorage.getItem('site_lang')||'ar'; }
+
+  // expose some functions to global for onclick handlers
+  window.openSection = openSection; window.runCmd = runCmd; window.addCyberUpdate = addCyberUpdate; window.addAIUpdate = addAIUpdate; window.quickFix = quickFix; window.formatCode = formatCode; window.addKBEntry = addKBEntry; window.kbAsk = kbAsk; window.renderKB = renderKB; window.submitContact = submitContact; window.renderContacts = renderContacts; window.changeLanguage = changeLanguage; window.setLangFromLogin = setLangFromLogin;
+
+  </script>
+</body>
+</html>
